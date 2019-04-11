@@ -4,7 +4,9 @@ SIMD Within a Register routine support crate
 
 See <https://en.wikipedia.org/wiki/SWAR> for more information.
 
-This crate attempts to collect SIMD Within a Register (SWAR) routines. A SWAR routine takes advantage of the fact that some operations can be computed in parallel in a single register without any SIMD extentions to the host processor at all. For instance, one common use of SWAR is in the rust `count_ones` instruction for targets without a dedicated `popcnt` instruction.
+Also check [the documentation](https://docs.rs/swar/) to see actual code examples.
+
+This crate attempts to collect SIMD Within a Register (SWAR) routines and present them in a type-safe manner so that the programmer can't make a mistake with the layout of the number. A SWAR routine takes advantage of the fact that some operations can be computed in parallel in a single register without any SIMD extentions to the host processor at all. For instance, one common use of SWAR is in the rust `count_ones` instruction for targets without a dedicated `popcnt` instruction.
 
 It is possible to mask every other bit in the number:
 
@@ -27,7 +29,9 @@ This pattern can continue and you can compute the hamming weight/`count_ones`/`p
 
 It is also important to be able to compute the hamming distance between two binary feature vectors. We can represent a binary feature vector compactly in memory by assigning each bit to be a feature. Then, to compute the hamming distance, one only needs to use the `XOR` operation. Since `XOR` sets each bit which was different in the original input registers, the output register has the bits set which were different between them. Now, this output can have its hamming weight calculated, and this computes the hamming distance!
 
-Due to modern systems pipelining, this can actually execute almost as fast as the native `popcnt` instruction in actual workloads, but huge disclaimers on that because the native instruction is faster than the parallel bitcount solution on modern processors in simple benchmarks (see [here](http://0x80.pl/articles/sse-popcount.html)) and the difference in routine size can also affect cache pressure, so don't forget to benchmark! Obviously, use `popcnt` if it is available! If it isn't, there is still a good fallback. Also consider using one of the SIMD variants in the reference that use the parallel bitcount, but use SIMD to push it to compute on even more bits.
+Due to modern systems pipelining, this can actually execute almost as fast as the native `popcnt` instruction in actual workloads, but huge disclaimers on that because the native instruction is definitely faster than the parallel bitcount solution on modern processors in simple benchmarks (see [here](http://0x80.pl/articles/sse-popcount.html)) and the difference in routine size can also affect cache pressure, so don't forget to benchmark! Obviously, use `popcnt` if it is available! If it isn't, there is still a good fallback available. Also consider using one of the SIMD variants in the reference that use the parallel bitcount, but use SIMD to push it to compute on even more bits.
+
+The main reason you might wish to use this version of parallel bit counting is if you actually need the intermediary bit counts! It turns out this is actually important for the implementation of the [`hwt` crate](https://github.com/vadixidav/hwt), which is what inspired me to make this library.
 
 We can also do other things in parallel. For instance, we can add in a register by adding single padding zeros to store the carry bits (adding two `n` bit numbers makes one `n+1` bit number):
 
