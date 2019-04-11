@@ -56,3 +56,7 @@ Note that we actually get three outputs from this multiplication! Multiplication
 efficient because we cannot pack the numbers very well, but it is possible in some scenarios.
 
 I don't know if SWAR division is really possible using any methods I know, but please feel free to open an issue or PR if you have another SWAR algorithm for division!
+
+## Credits
+
+The [Stanford Bit Twiddling Hacks](https://graphics.stanford.edu/~seander/bithacks.html) page by Sean Eron Anderson is the source of some and inspiration for other bit twiddling algorithms found in this code.
