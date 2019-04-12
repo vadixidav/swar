@@ -3,6 +3,7 @@ name = "swar"
 version = "0.1.0"
 authors = ["Geordon Worley <vadixidav@gmail.com>"]
 edition = "2018"
+description = "Perform operations in parallel on bit subslices in unsigned numbers"
 license = "MIT"
 keywords = ["simd", "swar", "bits", "hamming", "parallel"]
 documentation = "https://docs.rs/swar/"
