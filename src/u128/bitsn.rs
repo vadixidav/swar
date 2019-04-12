@@ -35,6 +35,20 @@ pub const SIGNS16: u128 = ONES16 << 15;
 pub const SIGNS32: u128 = ONES32 << 31;
 pub const SIGNS64: u128 = ONES64 << 63;
 
+pub const WEIGHT_MASK2: u128 = 0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF;
+pub const WEIGHT_MASK4: u128 = (ONES4 << 3) - ONES4;
+pub const WEIGHT_MASK8: u128 = (ONES8 << 4) - ONES8;
+pub const WEIGHT_MASK16: u128 = (ONES16 << 5) - ONES16;
+pub const WEIGHT_MASK32: u128 = (ONES32 << 6) - ONES32;
+pub const WEIGHT_MASK64: u128 = (ONES64 << 7) - ONES64;
+
+pub const WEIGHT_MSB2: u128 = ONES2 << 1;
+pub const WEIGHT_MSB4: u128 = ONES2 << 2;
+pub const WEIGHT_MSB8: u128 = ONES2 << 3;
+pub const WEIGHT_MSB16: u128 = ONES2 << 4;
+pub const WEIGHT_MSB32: u128 = ONES2 << 5;
+pub const WEIGHT_MSB64: u128 = ONES2 << 6;
+
 impl Bits1<u128> {
     #[inline]
     pub fn sum_weight2(self) -> Bits2<u128> {
@@ -156,6 +170,25 @@ impl Bits4<u128> {
     pub fn sum_weight2(self) -> Bits8<u128> {
         let (left, right) = self.split();
         (left + right).into()
+    }
+
+    /// This computes the hamming weight distance from hamming weights.
+    #[inline]
+    pub fn hwd(self, other: Self) -> Self {
+        let Self(a) = self;
+        let Self(b) = other;
+        // Compute ABC + !DEF.
+        let m = a + (b ^ WEIGHT_MASK4);
+        // Get the MSB of the weight.
+        let high = m & WEIGHT_MSB4;
+        // If the MSB is not set, we need to add 1 (because -n = ~n + 1).
+        let offset = (high ^ WEIGHT_MSB4) >> 2;
+        // If the MSB is set, we need to flip all the bits, but not add 1.
+        let flips = high | high >> 1 | high >> 2;
+        // The order we apply the offset and flips in is irrelevant because
+        // only one of the operations will have an effect anyways. We need
+        // to mask out the higher bit at the end because it shouldnt be set.
+        Self(((m ^ flips) + offset) & WEIGHT_MASK4)
     }
 
     #[inline]
