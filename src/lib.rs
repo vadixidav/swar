@@ -1,4 +1,4 @@
-//! ## Counting bits iteratively
+//! ## Computing hamming weights in parallel
 //! ```
 //! use swar::*;
 //! let n = 0xAAAA_AAAA_AAAA_AAAA_AAAA_AAAA_AAAA_AAAAu128;
@@ -18,6 +18,19 @@
 //!
 //! assert_eq!(Bits1(n).sum_weight2().sum_weight2().split().0,
 //!            Bits4x8(Bits8(0x0202_0202_0202_0202_0202_0202_0202_0202)));
+//! ```
+//! 
+//! ## Finding hamming weight differences in parallel
+//! ```
+//! use swar::*;
+//! 
+//! // All combinations of inputs 0-2 (hamming weights)
+//! let a = Bits2(0b00_01_10_00_01_10_00_01_10u128);
+//! let b = Bits2(0b00_00_00_01_01_01_10_10_10u128);
+//! // Expected output weights
+//! let expected = Bits2(0b00_01_10_01_00_01_10_01_00u128);
+//!
+//! assert_eq!(a.hwd(b), expected);
 //! ```
 #![no_std]
 
