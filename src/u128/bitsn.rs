@@ -455,6 +455,43 @@ impl Bits64<u128> {
         (left + right).into()
     }
 
+    /// This computes the hamming weight distance from hamming weights.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let bits = 64;
+    /// for a in 0u128..=bits as u128 {
+    ///     for b in 0u128..=bits as u128 {
+    ///         let aa = Bits64(a | a << bits);
+    ///         let bb = Bits64(b | b << bits);
+    ///         let out = aa.hwd(bb);
+    ///         let diff = (a as i128 - b as i128).abs() as u128;
+    ///         let expected = Bits64(diff | diff << bits);
+    ///         assert_eq!(out, expected);
+    ///     }
+    /// }
+    /// ```
+    #[inline]
+    pub fn hwd(self, other: Self) -> Self {
+        let Self(a) = self;
+        let Self(b) = other;
+        // Compute a + !b for each substring.
+        let m = a + (b ^ WEIGHT_MASK64);
+        // Get the MSB of the weight.
+        let high = m & WEIGHT_MSB64;
+        // If the MSB is not set, we need to add 1 (because -n = ~n + 1).
+        let offset = (high ^ WEIGHT_MSB64) >> 6;
+        // If the MSB is set, we need to flip all the bits.
+        let flips = high | high >> 1;
+        let flips = flips | flips >> 2;
+        let flips = flips | flips >> 3;
+        // The order we apply the offset and flips in is irrelevant because
+        // only one of the operations will have an effect anyways. We need
+        // to mask out the higher bit at the end because it shouldnt be set.
+        Self(((m ^ flips) + offset) & WEIGHT_MASK64)
+    }
+
     #[inline]
     pub fn split(self) -> (Bits64x128<u128>, Bits64x128<u128>) {
         let Self(n) = self;
