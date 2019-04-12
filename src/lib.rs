@@ -21,7 +21,7 @@
 //! ```
 #![no_std]
 
-mod u128;
+pub mod u128;
 
 /// This is used when each bit is a number stored in parallel.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

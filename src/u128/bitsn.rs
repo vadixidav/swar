@@ -1,8 +1,7 @@
 use crate::*;
-use core::ops::BitAnd;
-use core::ops::Shr;
+use core::ops::{BitAnd, Shr};
 
-const LEFT_MASKS: [u128; 7] = [
+pub const LEFT_MASKS: [u128; 7] = [
     0xFFFF_FFFF_FFFF_FFFF_0000_0000_0000_0000,
     0xFFFF_FFFF_0000_0000_FFFF_FFFF_0000_0000,
     0xFFFF_0000_FFFF_0000_FFFF_0000_FFFF_0000,
@@ -12,7 +11,7 @@ const LEFT_MASKS: [u128; 7] = [
     0xAAAA_AAAA_AAAA_AAAA_AAAA_AAAA_AAAA_AAAA,
 ];
 
-const RIGHT_MASKS: [u128; 7] = [
+pub const RIGHT_MASKS: [u128; 7] = [
     0x0000_0000_0000_0000_FFFF_FFFF_FFFF_FFFF,
     0x0000_0000_FFFF_FFFF_0000_0000_FFFF_FFFF,
     0x0000_FFFF_0000_FFFF_0000_FFFF_0000_FFFF,
@@ -22,6 +21,20 @@ const RIGHT_MASKS: [u128; 7] = [
     0x5555_5555_5555_5555_5555_5555_5555_5555,
 ];
 
+pub const ONES2: u128 = 0x5555_5555_5555_5555_5555_5555_5555_5555;
+pub const ONES4: u128 = 0x1111_1111_1111_1111_1111_1111_1111_1111;
+pub const ONES8: u128 = 0x0101_0101_0101_0101_0101_0101_0101_0101;
+pub const ONES16: u128 = 0x0001_0001_0001_0001_0001_0001_0001_0001;
+pub const ONES32: u128 = 0x0000_0001_0000_0001_0000_0001_0000_0001;
+pub const ONES64: u128 = 0x0000_0000_0000_0001_0000_0000_0000_0001;
+
+pub const SIGNS2: u128 = ONES2 << 1;
+pub const SIGNS4: u128 = ONES4 << 3;
+pub const SIGNS8: u128 = ONES8 << 7;
+pub const SIGNS16: u128 = ONES16 << 15;
+pub const SIGNS32: u128 = ONES32 << 31;
+pub const SIGNS64: u128 = ONES64 << 63;
+
 impl Bits1<u128> {
     #[inline]
     pub fn sum_weight2(self) -> Bits2<u128> {
@@ -29,8 +42,12 @@ impl Bits1<u128> {
         left + right
     }
 
+    /// This computes the hamming weight distance from hamming weights.
+    ///
+    /// For a Bits1, this is the same as computing the hamming weight from the
+    /// original number and is a simple XOR.
     #[inline]
-    pub fn abs_difference(self, other: Self) -> Self {
+    pub fn hwd(self, other: Self) -> Self {
         Self(self.0 ^ other.0)
     }
 
@@ -47,6 +64,7 @@ impl Bits1<u128> {
 impl BitAnd<u128> for Bits1<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -55,6 +73,7 @@ impl BitAnd<u128> for Bits1<u128> {
 impl Shr<u32> for Bits1<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
@@ -117,6 +136,7 @@ impl Bits2<u128> {
 impl BitAnd<u128> for Bits2<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -125,6 +145,7 @@ impl BitAnd<u128> for Bits2<u128> {
 impl Shr<u32> for Bits2<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
@@ -150,6 +171,7 @@ impl Bits4<u128> {
 impl BitAnd<u128> for Bits4<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -158,6 +180,7 @@ impl BitAnd<u128> for Bits4<u128> {
 impl Shr<u32> for Bits4<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
@@ -183,6 +206,7 @@ impl Bits8<u128> {
 impl BitAnd<u128> for Bits8<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -191,6 +215,7 @@ impl BitAnd<u128> for Bits8<u128> {
 impl Shr<u32> for Bits8<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
@@ -216,6 +241,7 @@ impl Bits16<u128> {
 impl BitAnd<u128> for Bits16<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -224,6 +250,7 @@ impl BitAnd<u128> for Bits16<u128> {
 impl Shr<u32> for Bits16<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
@@ -249,6 +276,7 @@ impl Bits32<u128> {
 impl BitAnd<u128> for Bits32<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -257,6 +285,7 @@ impl BitAnd<u128> for Bits32<u128> {
 impl Shr<u32> for Bits32<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
@@ -282,6 +311,7 @@ impl Bits64<u128> {
 impl BitAnd<u128> for Bits64<u128> {
     type Output = Self;
 
+    #[inline]
     fn bitand(self, rhs: u128) -> Self {
         Self(self.0 & rhs)
     }
@@ -290,12 +320,14 @@ impl BitAnd<u128> for Bits64<u128> {
 impl Shr<u32> for Bits64<u128> {
     type Output = Self;
 
+    #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
     }
 }
 
 impl From<Bits128<u128>> for u128 {
+    #[inline]
     fn from(n: Bits128<u128>) -> u128 {
         n.0
     }
