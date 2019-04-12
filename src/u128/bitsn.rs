@@ -30,6 +30,11 @@ impl Bits1<u128> {
     }
 
     #[inline]
+    pub fn abs_difference(self, other: Self) -> Self {
+        Self(self.0 ^ other.0)
+    }
+
+    #[inline]
     pub fn split(self) -> (Bits1x2<u128>, Bits1x2<u128>) {
         let Self(n) = self;
         (
@@ -60,6 +65,43 @@ impl Bits2<u128> {
     pub fn sum_weight2(self) -> Bits4<u128> {
         let (left, right) = self.split();
         (left + right).into()
+    }
+
+    /// This computes the hamming weight distance from hamming weights.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// // All combinations of inputs 0-2 (hamming weights)
+    /// let a = Bits2(0b00_01_10_00_01_10_00_01_10u128);
+    /// let b = Bits2(0b00_00_00_01_01_01_10_10_10u128);
+    /// // Expected output weights
+    /// let e = Bits2(0b00_01_10_01_00_01_10_01_00u128);
+    ///
+    /// assert_eq!(a.hwd(b), e, "got hamming distances {:b} expected {:b}", a.hwd(b).0, e.0);
+    /// ```
+    #[inline]
+    pub fn hwd(self, other: Self) -> Self {
+        // I worked out the Karnaugh map and got the following:
+        // High:
+        // |0|0|x|1|
+        // |0|0|x|0|
+        // |x|x|x|x|
+        // |1|0|x|0|
+        // Low:
+        // |0|1|x|0|
+        // |1|0|x|1|
+        // |x|x|x|x|
+        // |0|1|x|0|
+        // I reduced these maps to the following computation.
+        // high = B1 & !A1 & !A0 | A1 & !B1 & !B0
+        // low = !A0 & B0 | A0 & !B0
+        // Please send PRs if you can improve this.
+        let Self(a) = self;
+        let Self(b) = other;
+        let low = RIGHT_MASKS[6] & (a ^ b);
+        let high = LEFT_MASKS[6] & (b & !a & !a << 1 | a & !b & !b << 1);
+        Self(low | high)
     }
 
     #[inline]
