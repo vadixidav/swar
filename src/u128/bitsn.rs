@@ -43,11 +43,11 @@ pub const WEIGHT_MASK32: u128 = (ONES32 << 6) - ONES32;
 pub const WEIGHT_MASK64: u128 = (ONES64 << 7) - ONES64;
 
 pub const WEIGHT_MSB2: u128 = ONES2 << 1;
-pub const WEIGHT_MSB4: u128 = ONES2 << 2;
-pub const WEIGHT_MSB8: u128 = ONES2 << 3;
-pub const WEIGHT_MSB16: u128 = ONES2 << 4;
-pub const WEIGHT_MSB32: u128 = ONES2 << 5;
-pub const WEIGHT_MSB64: u128 = ONES2 << 6;
+pub const WEIGHT_MSB4: u128 = ONES4 << 2;
+pub const WEIGHT_MSB8: u128 = ONES8 << 3;
+pub const WEIGHT_MSB16: u128 = ONES16 << 4;
+pub const WEIGHT_MSB32: u128 = ONES32 << 5;
+pub const WEIGHT_MSB64: u128 = ONES64 << 6;
 
 impl Bits1<u128> {
     #[inline]
@@ -173,6 +173,21 @@ impl Bits4<u128> {
     }
 
     /// This computes the hamming weight distance from hamming weights.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// for a in 0u128..4 {
+    ///     for b in 0u128..4 {
+    ///         let aa = Bits4(a | a << 4);
+    ///         let bb = Bits4(b | b << 4);
+    ///         let out = aa.hwd(bb);
+    ///         let diff = (a as i128 - b as i128).abs() as u128;
+    ///         let expected = Bits4(diff | diff << 4);
+    ///         assert_eq!(out, expected, "got hamming distances {:08b} expected {:08b} ({:04b}, {:04b})", out.0, expected.0, a, b);
+    ///     }
+    /// }
+    /// ```
     #[inline]
     pub fn hwd(self, other: Self) -> Self {
         let Self(a) = self;
