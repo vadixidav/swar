@@ -177,8 +177,8 @@ impl Bits4<u128> {
     /// ```
     /// use swar::*;
     /// 
-    /// for a in 0u128..4 {
-    ///     for b in 0u128..4 {
+    /// for a in 0u128..=4 {
+    ///     for b in 0u128..=4 {
     ///         let aa = Bits4(a | a << 4);
     ///         let bb = Bits4(b | b << 4);
     ///         let out = aa.hwd(bb);
@@ -198,7 +198,7 @@ impl Bits4<u128> {
         let high = m & WEIGHT_MSB4;
         // If the MSB is not set, we need to add 1 (because -n = ~n + 1).
         let offset = (high ^ WEIGHT_MSB4) >> 2;
-        // If the MSB is set, we need to flip all the bits, but not add 1.
+        // If the MSB is set, we need to flip all the bits.
         let flips = high | high >> 1 | high >> 2;
         // The order we apply the offset and flips in is irrelevant because
         // only one of the operations will have an effect anyways. We need
@@ -239,6 +239,42 @@ impl Bits8<u128> {
     pub fn sum_weight2(self) -> Bits16<u128> {
         let (left, right) = self.split();
         (left + right).into()
+    }
+
+    /// This computes the hamming weight distance from hamming weights.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let bits = 8;
+    /// for a in 0u128..=bits as u128 {
+    ///     for b in 0u128..=bits as u128 {
+    ///         let aa = Bits8(a | a << bits);
+    ///         let bb = Bits8(b | b << bits);
+    ///         let out = aa.hwd(bb);
+    ///         let diff = (a as i128 - b as i128).abs() as u128;
+    ///         let expected = Bits8(diff | diff << bits);
+    ///         assert_eq!(out, expected, "got hamming distances {:016b} expected {:016b} ({:08b}, {:08b})", out.0, expected.0, a, b);
+    ///     }
+    /// }
+    /// ```
+    #[inline]
+    pub fn hwd(self, other: Self) -> Self {
+        let Self(a) = self;
+        let Self(b) = other;
+        // Compute a + !b for each substring.
+        let m = a + (b ^ WEIGHT_MASK8);
+        // Get the MSB of the weight.
+        let high = m & WEIGHT_MSB8;
+        // If the MSB is not set, we need to add 1 (because -n = ~n + 1).
+        let offset = (high ^ WEIGHT_MSB8) >> 3;
+        // If the MSB is set, we need to flip all the bits.
+        let flips = high | high >> 1;
+        let flips = flips | flips >> 2;
+        // The order we apply the offset and flips in is irrelevant because
+        // only one of the operations will have an effect anyways. We need
+        // to mask out the higher bit at the end because it shouldnt be set.
+        Self(((m ^ flips) + offset) & WEIGHT_MASK8)
     }
 
     #[inline]
