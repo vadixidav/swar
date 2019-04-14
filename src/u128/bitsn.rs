@@ -50,6 +50,27 @@ pub const WEIGHT_MSB32: u128 = ONES32 << 5;
 pub const WEIGHT_MSB64: u128 = ONES64 << 6;
 
 impl Bits1<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits1::from_element(1), Bits1(0xFFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF_FFFF));
+    /// assert_eq!(Bits1::from_element(0), Bits1(0x0000_0000_0000_0000_0000_0000_0000_0000));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n1 = e | e << 1;
+        let n2 = n1 | n1 << 2;
+        let n3 = n2 | n2 << 4;
+        let n4 = n3 | n3 << 8;
+        let n5 = n4 | n4 << 16;
+        let n6 = n5 | n5 << 32;
+        let n7 = n6 | n6 << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits2<u128> {
         let (left, right) = self.split();
@@ -94,6 +115,25 @@ impl Shr<u32> for Bits1<u128> {
 }
 
 impl Bits2<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits2::from_element(0b10), Bits2(0xAAAA_AAAA_AAAA_AAAA_AAAA_AAAA_AAAA_AAAA));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n2 = e | e << 2;
+        let n3 = n2 | n2 << 4;
+        let n4 = n3 | n3 << 8;
+        let n5 = n4 | n4 << 16;
+        let n6 = n5 | n5 << 32;
+        let n7 = n6 | n6 << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits4<u128> {
         let (left, right) = self.split();
@@ -166,6 +206,24 @@ impl Shr<u32> for Bits2<u128> {
 }
 
 impl Bits4<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits4::from_element(0b0110), Bits4(0x6666_6666_6666_6666_6666_6666_6666_6666));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n3 = e | e << 4;
+        let n4 = n3 | n3 << 8;
+        let n5 = n4 | n4 << 16;
+        let n6 = n5 | n5 << 32;
+        let n7 = n6 | n6 << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits8<u128> {
         let (left, right) = self.split();
@@ -173,10 +231,10 @@ impl Bits4<u128> {
     }
 
     /// This computes the hamming weight distance from hamming weights.
-    /// 
+    ///
     /// ```
     /// use swar::*;
-    /// 
+    ///
     /// for a in 0u128..=4 {
     ///     for b in 0u128..=4 {
     ///         let aa = Bits4(a | a << 4);
@@ -235,6 +293,23 @@ impl Shr<u32> for Bits4<u128> {
 }
 
 impl Bits8<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits8::from_element(0xFE), Bits8(0xFEFE_FEFE_FEFE_FEFE_FEFE_FEFE_FEFE_FEFE));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n4 = e | e << 8;
+        let n5 = n4 | n4 << 16;
+        let n6 = n5 | n5 << 32;
+        let n7 = n6 | n6 << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits16<u128> {
         let (left, right) = self.split();
@@ -242,10 +317,10 @@ impl Bits8<u128> {
     }
 
     /// This computes the hamming weight distance from hamming weights.
-    /// 
+    ///
     /// ```
     /// use swar::*;
-    /// 
+    ///
     /// let bits = 8;
     /// for a in 0u128..=bits as u128 {
     ///     for b in 0u128..=bits as u128 {
@@ -306,6 +381,22 @@ impl Shr<u32> for Bits8<u128> {
 }
 
 impl Bits16<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits16::from_element(0xFEED), Bits16(0xFEED_FEED_FEED_FEED_FEED_FEED_FEED_FEED));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n5 = e | e << 16;
+        let n6 = n5 | n5 << 32;
+        let n7 = n6 | n6 << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits32<u128> {
         let (left, right) = self.split();
@@ -313,10 +404,10 @@ impl Bits16<u128> {
     }
 
     /// This computes the hamming weight distance from hamming weights.
-    /// 
+    ///
     /// ```
     /// use swar::*;
-    /// 
+    ///
     /// let bits = 16;
     /// for a in 0u128..=bits as u128 {
     ///     for b in 0u128..=bits as u128 {
@@ -377,6 +468,21 @@ impl Shr<u32> for Bits16<u128> {
 }
 
 impl Bits32<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits32::from_element(0xFEED_FACE), Bits32(0xFEED_FACE_FEED_FACE_FEED_FACE_FEED_FACE));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n6 = e | e << 32;
+        let n7 = n6 | n6 << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits64<u128> {
         let (left, right) = self.split();
@@ -384,10 +490,10 @@ impl Bits32<u128> {
     }
 
     /// This computes the hamming weight distance from hamming weights.
-    /// 
+    ///
     /// ```
     /// use swar::*;
-    /// 
+    ///
     /// let bits = 32;
     /// for a in 0u128..=bits as u128 {
     ///     for b in 0u128..=bits as u128 {
@@ -449,6 +555,20 @@ impl Shr<u32> for Bits32<u128> {
 }
 
 impl Bits64<u128> {
+    /// Spread a single value out to each element. Must be able to fit.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// assert_eq!(Bits64::from_element(0xFEED_FACE_CAFE_BEEF), Bits64(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF));
+    /// ```
+    #[inline]
+    pub fn from_element(e: u128) -> Self {
+        // We can do this in log2(bits) time by doubling the sequence.
+        let n7 = e | e << 64;
+        Self(n7)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits128<u128> {
         let (left, right) = self.split();
@@ -456,10 +576,10 @@ impl Bits64<u128> {
     }
 
     /// This computes the hamming weight distance from hamming weights.
-    /// 
+    ///
     /// ```
     /// use swar::*;
-    /// 
+    ///
     /// let bits = 64;
     /// for a in 0u128..=bits as u128 {
     ///     for b in 0u128..=bits as u128 {
