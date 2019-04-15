@@ -71,6 +71,37 @@ impl Bits1<u128> {
         Self(n7)
     }
 
+    /// Takes the left and right sides and spreads them out
+    /// so that the bits in each element are spread out into twice
+    /// the amount of space.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits1(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits1::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits2<u128>, right: Bits2<u128>) -> Self {
+        let Bits2(left) = left;
+        let Bits2(right) = right;
+        let left = (left & LEFT_MASKS[5]) >> 1 | left & RIGHT_MASKS[5];
+        let left = (left & LEFT_MASKS[4]) >> 2 | left & RIGHT_MASKS[4];
+        let left = (left & LEFT_MASKS[3]) >> 4 | left & RIGHT_MASKS[3];
+        let left = (left & LEFT_MASKS[2]) >> 8 | left & RIGHT_MASKS[2];
+        let left = (left & LEFT_MASKS[1]) >> 16 | left & RIGHT_MASKS[1];
+        let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[5]) >> 1 | right & RIGHT_MASKS[5];
+        let right = (right & LEFT_MASKS[4]) >> 2 | right & RIGHT_MASKS[4];
+        let right = (right & LEFT_MASKS[3]) >> 4 | right & RIGHT_MASKS[3];
+        let right = (right & LEFT_MASKS[2]) >> 8 | right & RIGHT_MASKS[2];
+        let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
+        let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
+        Self(left << 64 | right)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits2<u128> {
         let (left, right) = self.split();
