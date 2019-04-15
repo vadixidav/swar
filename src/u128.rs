@@ -102,6 +102,11 @@ impl Bits1<u128> {
     }
 
     #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.0.count_ones().into()
+    }
+
+    #[inline]
     pub fn sum_weight2(self) -> Bits2<u128> {
         let (left, right) = self.split();
         left + right
@@ -230,6 +235,17 @@ impl Bits2<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .0
     }
 
     #[inline]
@@ -387,6 +403,16 @@ impl Bits4<u128> {
     }
 
     #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .0
+    }
+
+    #[inline]
     pub fn sum_weight2(self) -> Bits8<u128> {
         let (left, right) = self.split();
         left + right
@@ -533,6 +559,15 @@ impl Bits8<u128> {
     }
 
     #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .sum_weight2()
+            .0
+    }
+
+    #[inline]
     pub fn sum_weight2(self) -> Bits16<u128> {
         let (left, right) = self.split();
         left + right
@@ -673,6 +708,11 @@ impl Bits16<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.sum_weight2().sum_weight2().sum_weight2().0
     }
 
     #[inline]
@@ -817,6 +857,11 @@ impl Bits32<u128> {
     }
 
     #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.sum_weight2().sum_weight2().0
+    }
+
+    #[inline]
     pub fn sum_weight2(self) -> Bits64<u128> {
         let (left, right) = self.split();
         left + right
@@ -954,6 +999,11 @@ impl Bits64<u128> {
     }
 
     #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.sum_weight2().0
+    }
+
+    #[inline]
     pub fn sum_weight2(self) -> Bits128<u128> {
         let (left, right) = self.split();
         left + right
@@ -1052,6 +1102,13 @@ impl Shr<u32> for Bits64<u128> {
     #[inline]
     fn shr(self, rhs: u32) -> Self {
         Self(self.0 >> rhs)
+    }
+}
+
+impl Bits128<u128> {
+    #[inline]
+    pub fn sum_weight(self) -> u128 {
+        self.0
     }
 }
 
