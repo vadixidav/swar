@@ -94,6 +94,38 @@ impl Bits1<u128> {
             Bits1x2(Bits2(n & RIGHT_MASKS[6])),
         )
     }
+
+    /// Takes the left and right sides and spreads them out
+    /// so that the bits in each element are spread out into twice
+    /// the amount of space.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits1(0b1101 << 64 | 0b0101u128);
+    /// let (left, right) = input.halve();
+    /// assert_eq!(left, Bits2(0b0101_0001));
+    /// assert_eq!(right, Bits2(0b0001_0001));
+    /// ```
+    #[inline]
+    pub fn halve(self) -> (Bits2<u128>, Bits2<u128>) {
+        let Self(n) = self;
+        let left = (n & LEFT_MASKS[0]) >> 64;
+        let left = (left & LEFT_MASKS[1]) << 32 | left & RIGHT_MASKS[1];
+        let left = (left & LEFT_MASKS[2]) << 16 | left & RIGHT_MASKS[2];
+        let left = (left & LEFT_MASKS[3]) << 8 | left & RIGHT_MASKS[3];
+        let left = (left & LEFT_MASKS[4]) << 4 | left & RIGHT_MASKS[4];
+        let left = (left & LEFT_MASKS[5]) << 2 | left & RIGHT_MASKS[5];
+        let left = (left & LEFT_MASKS[6]) << 1 | left & RIGHT_MASKS[6];
+        let right = n & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[1]) << 32 | right & RIGHT_MASKS[1];
+        let right = (right & LEFT_MASKS[2]) << 16 | right & RIGHT_MASKS[2];
+        let right = (right & LEFT_MASKS[3]) << 8 | right & RIGHT_MASKS[3];
+        let right = (right & LEFT_MASKS[4]) << 4 | right & RIGHT_MASKS[4];
+        let right = (right & LEFT_MASKS[5]) << 2 | right & RIGHT_MASKS[5];
+        let right = (right & LEFT_MASKS[6]) << 1 | right & RIGHT_MASKS[6];
+        (Bits2(left), Bits2(right))
+    }
 }
 
 impl BitAnd<u128> for Bits1<u128> {

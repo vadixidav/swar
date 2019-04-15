@@ -6,7 +6,7 @@ See <https://en.wikipedia.org/wiki/SWAR> for more information.
 
 Also check [the documentation](https://docs.rs/swar/) to see actual code examples.
 
-Note that this crate will be completely refactored after const generics lands in nightly.
+Note that this crate will be completely refactored after const generics lands in nightly. Future versions of this crate will then depend on nightly until const generics is stable.
 
 This crate attempts to collect SIMD Within a Register (SWAR) routines and present them in a type-safe manner so that the programmer can't make a mistake with the layout of the number. A SWAR routine takes advantage of the fact that some operations can be computed in parallel in a single register without any SIMD extentions to the host processor at all. For instance, one common use of SWAR is in the rust `count_ones` instruction for targets without a dedicated `popcnt` instruction.
 
