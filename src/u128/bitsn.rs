@@ -71,9 +71,8 @@ impl Bits1<u128> {
         Self(n7)
     }
 
-    /// Takes the left and right sides and spreads them out
-    /// so that the bits in each element are spread out into twice
-    /// the amount of space.
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
     ///
     /// ```
     /// use swar::*;
@@ -197,6 +196,34 @@ impl Bits2<u128> {
         Self(n7)
     }
 
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits2(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits2::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits4<u128>, right: Bits4<u128>) -> Self {
+        let Bits4(left) = left;
+        let Bits4(right) = right;
+        let left = (left & LEFT_MASKS[4]) >> 2 | left & RIGHT_MASKS[4];
+        let left = (left & LEFT_MASKS[3]) >> 4 | left & RIGHT_MASKS[3];
+        let left = (left & LEFT_MASKS[2]) >> 8 | left & RIGHT_MASKS[2];
+        let left = (left & LEFT_MASKS[1]) >> 16 | left & RIGHT_MASKS[1];
+        let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[4]) >> 2 | right & RIGHT_MASKS[4];
+        let right = (right & LEFT_MASKS[3]) >> 4 | right & RIGHT_MASKS[3];
+        let right = (right & LEFT_MASKS[2]) >> 8 | right & RIGHT_MASKS[2];
+        let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
+        let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
+        Self(left << 64 | right)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits4<u128> {
         let (left, right) = self.split();
@@ -317,6 +344,32 @@ impl Bits4<u128> {
         Self(n7)
     }
 
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits4(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits4::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits8<u128>, right: Bits8<u128>) -> Self {
+        let Bits8(left) = left;
+        let Bits8(right) = right;
+        let left = (left & LEFT_MASKS[3]) >> 4 | left & RIGHT_MASKS[3];
+        let left = (left & LEFT_MASKS[2]) >> 8 | left & RIGHT_MASKS[2];
+        let left = (left & LEFT_MASKS[1]) >> 16 | left & RIGHT_MASKS[1];
+        let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[3]) >> 4 | right & RIGHT_MASKS[3];
+        let right = (right & LEFT_MASKS[2]) >> 8 | right & RIGHT_MASKS[2];
+        let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
+        let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
+        Self(left << 64 | right)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits8<u128> {
         let (left, right) = self.split();
@@ -429,6 +482,30 @@ impl Bits8<u128> {
         let n6 = n5 | n5 << 32;
         let n7 = n6 | n6 << 64;
         Self(n7)
+    }
+
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits8(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits8::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits16<u128>, right: Bits16<u128>) -> Self {
+        let Bits16(left) = left;
+        let Bits16(right) = right;
+        let left = (left & LEFT_MASKS[2]) >> 8 | left & RIGHT_MASKS[2];
+        let left = (left & LEFT_MASKS[1]) >> 16 | left & RIGHT_MASKS[1];
+        let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[2]) >> 8 | right & RIGHT_MASKS[2];
+        let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
+        let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
+        Self(left << 64 | right)
     }
 
     #[inline]
@@ -544,6 +621,28 @@ impl Bits16<u128> {
         Self(n7)
     }
 
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits16(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits16::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits32<u128>, right: Bits32<u128>) -> Self {
+        let Bits32(left) = left;
+        let Bits32(right) = right;
+        let left = (left & LEFT_MASKS[1]) >> 16 | left & RIGHT_MASKS[1];
+        let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
+        let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
+        Self(left << 64 | right)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits32<u128> {
         let (left, right) = self.split();
@@ -654,6 +753,26 @@ impl Bits32<u128> {
         Self(n7)
     }
 
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits32(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits32::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits64<u128>, right: Bits64<u128>) -> Self {
+        let Bits64(left) = left;
+        let Bits64(right) = right;
+        let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
+        let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
+        Self(left << 64 | right)
+    }
+
     #[inline]
     pub fn sum_weight2(self) -> Bits64<u128> {
         let (left, right) = self.split();
@@ -760,6 +879,24 @@ impl Bits64<u128> {
         // We can do this in log2(bits) time by doubling the sequence.
         let n7 = e | e << 64;
         Self(n7)
+    }
+
+    /// Takes two inputs that have half-sized elements and compresses them
+    /// into half the space and puts them in the left and right sides of this.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits64(0xFEED_FACE_CAFE_BEEF_FEED_FACE_CAFE_BEEF);
+    /// let (left, right) = input.halve();
+    /// let output = Bits64::union(left, right);
+    /// assert_eq!(input, output);
+    /// ```
+    #[inline]
+    pub fn union(left: Bits128<u128>, right: Bits128<u128>) -> Self {
+        let Bits128(left) = left;
+        let Bits128(right) = right;
+        Self(left << 64 | right)
     }
 
     #[inline]
