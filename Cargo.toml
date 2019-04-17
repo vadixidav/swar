@@ -8,3 +8,6 @@ license = "MIT"
 keywords = ["simd", "swar", "bits", "hamming", "parallel"]
 documentation = "https://docs.rs/swar/"
 repository = "https://github.com/vadixidav/swar"
+
+[dev-dependencies]
+rand = "0.6.5"
