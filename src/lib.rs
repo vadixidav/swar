@@ -30,7 +30,7 @@
 //! // Expected output weights
 //! let expected = Bits2(0b00_01_10_01_00_01_10_01_00u128);
 //!
-//! assert_eq!(a.hwd(b), expected);
+//! assert_eq!(a.minhwd(b), expected);
 //! ```
 #![no_std]
 

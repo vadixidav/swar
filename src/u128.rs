@@ -112,12 +112,12 @@ impl Bits1<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// For a Bits1, this is the same as computing the hamming weight from the
     /// original number and is a simple XOR.
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         Self(self.0 ^ other.0)
     }
 
@@ -254,7 +254,7 @@ impl Bits2<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// ```
     /// use swar::*;
@@ -265,10 +265,10 @@ impl Bits2<u128> {
     /// // Expected output weights
     /// let e = Bits2(0b00_01_10_01_00_01_10_01_00u128);
     ///
-    /// assert_eq!(a.hwd(b), e, "got hamming distances {:b} expected {:b}", a.hwd(b).0, e.0);
+    /// assert_eq!(a.minhwd(b), e, "got hamming distances {:b} expected {:b}", a.minhwd(b).0, e.0);
     /// ```
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         // I worked out the Karnaugh map and got the following:
         // High:
         // |0|0|x|1|
@@ -418,7 +418,7 @@ impl Bits4<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// ```
     /// use swar::*;
@@ -427,7 +427,7 @@ impl Bits4<u128> {
     ///     for b in 0u128..=4 {
     ///         let aa = Bits4(a | a << 4);
     ///         let bb = Bits4(b | b << 4);
-    ///         let out = aa.hwd(bb);
+    ///         let out = aa.minhwd(bb);
     ///         let diff = (a as i128 - b as i128).abs() as u128;
     ///         let expected = Bits4(diff | diff << 4);
     ///         assert_eq!(out, expected, "got hamming distances {:08b} expected {:08b} ({:04b}, {:04b})", out.0, expected.0, a, b);
@@ -435,7 +435,7 @@ impl Bits4<u128> {
     /// }
     /// ```
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         let Self(a) = self;
         let Self(b) = other;
         // Compute ABC + !DEF.
@@ -573,7 +573,7 @@ impl Bits8<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// ```
     /// use swar::*;
@@ -583,7 +583,7 @@ impl Bits8<u128> {
     ///     for b in 0u128..=bits as u128 {
     ///         let aa = Bits8(a | a << bits);
     ///         let bb = Bits8(b | b << bits);
-    ///         let out = aa.hwd(bb);
+    ///         let out = aa.minhwd(bb);
     ///         let diff = (a as i128 - b as i128).abs() as u128;
     ///         let expected = Bits8(diff | diff << bits);
     ///         assert_eq!(out, expected, "got hamming distances {:016b} expected {:016b} ({:08b}, {:08b})", out.0, expected.0, a, b);
@@ -591,7 +591,7 @@ impl Bits8<u128> {
     /// }
     /// ```
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         let Self(a) = self;
         let Self(b) = other;
         // Compute a + !b for each substring.
@@ -721,7 +721,7 @@ impl Bits16<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// ```
     /// use swar::*;
@@ -731,7 +731,7 @@ impl Bits16<u128> {
     ///     for b in 0u128..=bits as u128 {
     ///         let aa = Bits16(a | a << bits);
     ///         let bb = Bits16(b | b << bits);
-    ///         let out = aa.hwd(bb);
+    ///         let out = aa.minhwd(bb);
     ///         let diff = (a as i128 - b as i128).abs() as u128;
     ///         let expected = Bits16(diff | diff << bits);
     ///         assert_eq!(out, expected);
@@ -739,7 +739,7 @@ impl Bits16<u128> {
     /// }
     /// ```
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         let Self(a) = self;
         let Self(b) = other;
         // Compute a + !b for each substring.
@@ -867,7 +867,7 @@ impl Bits32<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// ```
     /// use swar::*;
@@ -877,7 +877,7 @@ impl Bits32<u128> {
     ///     for b in 0u128..=bits as u128 {
     ///         let aa = Bits32(a | a << bits);
     ///         let bb = Bits32(b | b << bits);
-    ///         let out = aa.hwd(bb);
+    ///         let out = aa.minhwd(bb);
     ///         let diff = (a as i128 - b as i128).abs() as u128;
     ///         let expected = Bits32(diff | diff << bits);
     ///         assert_eq!(out, expected);
@@ -885,7 +885,7 @@ impl Bits32<u128> {
     /// }
     /// ```
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         let Self(a) = self;
         let Self(b) = other;
         // Compute a + !b for each substring.
@@ -1009,7 +1009,7 @@ impl Bits64<u128> {
         left + right
     }
 
-    /// This computes the hamming weight distance from hamming weights.
+    /// This computes the minimum hamming weight distance from hamming weights.
     ///
     /// ```
     /// use swar::*;
@@ -1019,7 +1019,7 @@ impl Bits64<u128> {
     ///     for b in 0u128..=bits as u128 {
     ///         let aa = Bits64(a | a << bits);
     ///         let bb = Bits64(b | b << bits);
-    ///         let out = aa.hwd(bb);
+    ///         let out = aa.minhwd(bb);
     ///         let diff = (a as i128 - b as i128).abs() as u128;
     ///         let expected = Bits64(diff | diff << bits);
     ///         assert_eq!(out, expected);
@@ -1027,7 +1027,7 @@ impl Bits64<u128> {
     /// }
     /// ```
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         let Self(a) = self;
         let Self(b) = other;
         let a_low = a as i32;
@@ -1103,7 +1103,7 @@ impl Bits128<u128> {
     }
 
     #[inline]
-    pub fn hwd(self, other: Self) -> Self {
+    pub fn minhwd(self, other: Self) -> Self {
         Self((self.0 as i32 - other.0 as i32).abs() as u128)
     }
 }
