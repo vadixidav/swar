@@ -279,6 +279,15 @@ impl Bits2<u128> {
         Self(left << 64 | right)
     }
 
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits1<u128> {
+        Bits1::union(Self(0), self)
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2()
@@ -484,6 +493,15 @@ impl Bits4<u128> {
         Self(left << 64 | right)
     }
 
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits2<u128> {
+        Bits2::union(Self(0), self)
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2()
@@ -655,6 +673,15 @@ impl Bits8<u128> {
         Self(left << 64 | right)
     }
 
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits4<u128> {
+        Bits4::union(Self(0), self)
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2()
@@ -822,6 +849,15 @@ impl Bits16<u128> {
         Self(left << 64 | right)
     }
 
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits8<u128> {
+        Bits8::union(Self(0), self)
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().sum_weight2().sum_weight2().0
@@ -983,6 +1019,15 @@ impl Bits32<u128> {
         Self(left << 64 | right)
     }
 
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits16<u128> {
+        Bits16::union(Self(0), self)
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().sum_weight2().0
@@ -1140,6 +1185,15 @@ impl Bits64<u128> {
         Self(left << 64 | right)
     }
 
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits32<u128> {
+        Bits32::union(Self(0), self)
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().0
@@ -1256,6 +1310,15 @@ impl Bits128<u128> {
     pub fn any(self) -> Self {
         let Bits64(x) = Bits64(self.0).any();
         Self((x & LEFT_MASKS[0]) >> 64 | x & RIGHT_MASKS[0])
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits64<u128> {
+        Bits64::union(Self(0), self)
     }
 
     #[inline]
