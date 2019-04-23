@@ -116,8 +116,21 @@ impl Bits1<u128> {
     ///
     /// For a Bits1, this is the same as computing the hamming weight from the
     /// original number and is a simple XOR.
+    ///
+    /// The minimum and maximum weights are exactly the same for single bits.
     #[inline]
     pub fn minhwd(self, other: Self) -> Self {
+        Self(self.0 ^ other.0)
+    }
+
+    /// This computes the maximum hamming weight distance from hamming weights.
+    ///
+    /// For a Bits1, this is the same as computing the hamming weight from the
+    /// original number and is a simple XOR.
+    ///
+    /// The minimum and maximum weights are exactly the same for single bits.
+    #[inline]
+    pub fn maxhwd(self, other: Self) -> Self {
         Self(self.0 ^ other.0)
     }
 
@@ -288,6 +301,31 @@ impl Bits2<u128> {
         let Self(b) = other;
         let low = RIGHT_MASKS[6] & (a ^ b);
         let high = LEFT_MASKS[6] & (b & !a & !a << 1 | a & !b & !b << 1);
+        Self(low | high)
+    }
+
+    /// This computes the maximum hamming weight distance from hamming weights.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// // All combinations of inputs 0-2 (hamming weights)
+    /// let a = Bits2(0b00_01_10_00_01_10_00_01_10u128);
+    /// let b = Bits2(0b00_00_00_01_01_01_10_10_10u128);
+    /// // Expected output weights
+    /// let e = Bits2(0b00_01_10_01_10_01_10_01_00u128);
+    ///
+    /// assert_eq!(a.maxhwd(b), e, "got hamming distances {:b} expected {:b}", a.maxhwd(b).0, e.0);
+    /// ```
+    #[inline]
+    pub fn maxhwd(self, other: Self) -> Self {
+        // This is the same as `minhwd` except that if the input is
+        // `1` and `1` the bits could be in different spots so the max
+        // is `2`.
+        let Self(a) = self;
+        let Self(b) = other;
+        let low = RIGHT_MASKS[6] & (a ^ b);
+        let high = LEFT_MASKS[6] & (b & !a & !a << 1 | a & !b & !b << 1 | a << 1 & b << 1);
         Self(low | high)
     }
 
