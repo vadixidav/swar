@@ -102,6 +102,28 @@ impl Bits1<u128> {
     }
 
     #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
+    /// Sqishes all the bits to the right in each 2-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits1(0b00_01_10_11);
+    /// let out = Bits2(0b00_01_01_11);
+    /// assert_eq!(input.squish_weight(), out);
+    /// ```
+    #[inline]
+    pub fn squish_weight(self) -> Bits2<u128> {
+        let Self(x) = self;
+        let lower = (x & LEFT_MASKS[6]) >> 1 | x & RIGHT_MASKS[6];
+        let upper = x & (x & RIGHT_MASKS[6]) << 1;
+        Bits2(lower | upper)
+    }
+
+    #[inline]
     pub fn sum_weight(self) -> u128 {
         self.0.count_ones().into()
     }
@@ -248,6 +270,11 @@ impl Bits2<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
     }
 
     #[inline]
@@ -441,6 +468,11 @@ impl Bits4<u128> {
     }
 
     #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
+    #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2()
             .sum_weight2()
@@ -597,6 +629,11 @@ impl Bits8<u128> {
     }
 
     #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
+    #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2()
             .sum_weight2()
@@ -749,6 +786,11 @@ impl Bits16<u128> {
     }
 
     #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
+    #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().sum_weight2().sum_weight2().0
     }
@@ -895,6 +937,11 @@ impl Bits32<u128> {
     }
 
     #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
+    #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().sum_weight2().0
     }
@@ -1037,6 +1084,11 @@ impl Bits64<u128> {
     }
 
     #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
+    #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().0
     }
@@ -1135,6 +1187,11 @@ impl Shr<u32> for Bits64<u128> {
 }
 
 impl Bits128<u128> {
+    #[inline]
+    pub fn net_hamming_weight(self) -> u32 {
+        self.0.count_ones()
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.0
