@@ -71,6 +71,20 @@ impl Bits1<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits1(0b1010u128);
+    /// let output = Bits1(0b1010u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        self
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -244,6 +258,21 @@ impl Bits2<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits2(0b01101100u128);
+    /// let output = Bits2(0b01010100u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Self(x) = self;
+        Self((x & LEFT_MASKS[6]) >> 1 | x & RIGHT_MASKS[6])
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -270,6 +299,15 @@ impl Bits2<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits1<u128> {
+        Bits1::union(Self(0), self)
     }
 
     #[inline]
@@ -441,6 +479,21 @@ impl Bits4<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits4(0xE_0u128);
+    /// let output = Bits4(0x1_0u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Bits2(x) = Bits2(self.0).any();
+        Self((x & LEFT_MASKS[5]) >> 2 | x & RIGHT_MASKS[5])
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -465,6 +518,15 @@ impl Bits4<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits2<u128> {
+        Bits2::union(Self(0), self)
     }
 
     #[inline]
@@ -604,6 +666,21 @@ impl Bits8<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits8(0xF0_00u128);
+    /// let output = Bits8(0x01_00u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Bits4(x) = Bits4(self.0).any();
+        Self((x & LEFT_MASKS[4]) >> 4 | x & RIGHT_MASKS[4])
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -626,6 +703,15 @@ impl Bits8<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits4<u128> {
+        Bits4::union(Self(0), self)
     }
 
     #[inline]
@@ -763,6 +849,21 @@ impl Bits16<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits16(0x8000_0000u128);
+    /// let output = Bits16(0x0001_0000u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Bits8(x) = Bits8(self.0).any();
+        Self((x & LEFT_MASKS[3]) >> 8 | x & RIGHT_MASKS[3])
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -783,6 +884,15 @@ impl Bits16<u128> {
         let right = (right & LEFT_MASKS[1]) >> 16 | right & RIGHT_MASKS[1];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits8<u128> {
+        Bits8::union(Self(0), self)
     }
 
     #[inline]
@@ -916,6 +1026,21 @@ impl Bits32<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits32(0x8000_0000_0000_0000u128);
+    /// let output = Bits32(0x0000_0001_0000_0000u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Bits16(x) = Bits16(self.0).any();
+        Self((x & LEFT_MASKS[2]) >> 16 | x & RIGHT_MASKS[2])
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -934,6 +1059,15 @@ impl Bits32<u128> {
         let left = (left & LEFT_MASKS[0]) >> 32 | left & RIGHT_MASKS[0];
         let right = (right & LEFT_MASKS[0]) >> 32 | right & RIGHT_MASKS[0];
         Self(left << 64 | right)
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits16<u128> {
+        Bits16::union(Self(0), self)
     }
 
     #[inline]
@@ -1065,6 +1199,21 @@ impl Bits64<u128> {
         Self(n7)
     }
 
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits64(0x8000_0000_0000_0000_0000_0000_0000_0000u128);
+    /// let output = Bits64(0x0000_0000_0000_0001_0000_0000_0000_0000u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Bits32(x) = Bits32(self.0).any();
+        Self((x & LEFT_MASKS[1]) >> 32 | x & RIGHT_MASKS[1])
+    }
+
     /// Takes two inputs that have half-sized elements and compresses them
     /// into half the space and puts them in the left and right sides of this.
     ///
@@ -1081,6 +1230,15 @@ impl Bits64<u128> {
         let Bits128(left) = left;
         let Bits128(right) = right;
         Self(left << 64 | right)
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits32<u128> {
+        Bits32::union(Self(0), self)
     }
 
     #[inline]
@@ -1187,6 +1345,34 @@ impl Shr<u32> for Bits64<u128> {
 }
 
 impl Bits128<u128> {
+    /// If any bit is set in each element, sets the element to 1, else 0.
+    /// 
+    /// ```
+    /// use swar::*;
+    /// 
+    /// let input = Bits128(0x8000_0000_0000_0000_0000_0000_0000_0000u128);
+    /// let output = Bits128(0x0000_0000_0000_0000_0000_0000_0000_0001u128);
+    /// assert_eq!(input.any(), output);
+    /// 
+    /// let input = Bits128(0x0000_0000_0000_0000_0000_0000_0000_0000u128);
+    /// let output = Bits128(0x0000_0000_0000_0000_0000_0000_0000_0000u128);
+    /// assert_eq!(input.any(), output);
+    /// ```
+    #[inline]
+    pub fn any(self) -> Self {
+        let Bits64(x) = Bits64(self.0).any();
+        Self((x & LEFT_MASKS[0]) >> 64 | x & RIGHT_MASKS[0])
+    }
+
+    /// Squashes half-sized elements into half-sized spaces to the right
+    /// and fills the left half of the number with zeros.
+    /// 
+    /// This is the same as `union(0, n)`.
+    #[inline]
+    pub fn squash(self) -> Bits64<u128> {
+        Bits64::union(Self(0), self)
+    }
+
     #[inline]
     pub fn net_hamming_weight(self) -> u32 {
         self.0.count_ones()
