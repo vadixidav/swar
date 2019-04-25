@@ -116,7 +116,7 @@ impl Bits1<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -311,7 +311,7 @@ impl Bits2<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -563,7 +563,7 @@ impl Bits4<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -748,7 +748,7 @@ impl Bits8<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -929,7 +929,7 @@ impl Bits16<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -1104,7 +1104,7 @@ impl Bits32<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -1275,7 +1275,7 @@ impl Bits64<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
@@ -1407,7 +1407,7 @@ impl Bits128<u128> {
     }
 
     #[inline]
-    pub fn net_hamming_weight(self) -> u32 {
+    pub fn count_ones(self) -> u32 {
         self.0.count_ones()
     }
 
