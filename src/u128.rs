@@ -341,7 +341,7 @@ impl Bits2<u128> {
         let Self(x) = self;
         let l = x & LEFT_MASKS[5];
         let r = x & RIGHT_MASKS[5];
-        let l0 = l & RIGHT_MASKS[6];
+        let l0 = l;
         let l1 = l & LEFT_MASKS[6];
         let l0_l0 = l0 | l0 >> 1;
         let l1_l1 = l1 | l1 >> 1;
