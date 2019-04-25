@@ -127,7 +127,7 @@ impl Bits1<u128> {
     ///
     /// let input = Bits1(0b00_01_10_11);
     /// let out = Bits2(0b00_01_01_11);
-    /// assert_eq!(input.squish_weight(), out);
+    /// assert_eq!(input.pack_ones(), out);
     /// ```
     #[inline]
     pub fn pack_ones(self) -> Bits2<u128> {
@@ -313,6 +313,39 @@ impl Bits2<u128> {
     #[inline]
     pub fn net_hamming_weight(self) -> u32 {
         self.0.count_ones()
+    }
+
+    /// Sqishes all the bits to the right in each 2-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits2(0b11_01_01_00);
+    /// let out = Bits4(0b0111_0001);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits2(0b11_11_00_00);
+    /// let out = Bits4(0b1111_0000);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits2(0b01_01_00_01);
+    /// let out = Bits4(0b0011_0001);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits2(0b11_00_00_11);
+    /// let out = Bits4(0b0011_0011);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    /// ```
+    #[inline]
+    pub fn pack_ones(self) -> Bits4<u128> {
+        let Self(x) = self;
+        let l = x & LEFT_MASKS[5];
+        let r = x & RIGHT_MASKS[5];
+        let l0 = l & RIGHT_MASKS[6];
+        let l1 = l & LEFT_MASKS[6];
+        let l0_l0 = l0 | l0 >> 1;
+        let l1_l1 = l1 | l1 >> 1;
+        Bits4(l1_l1 & r << 2 | l0_l0 & r << 1 | l >> 2 | r)
     }
 
     #[inline]
