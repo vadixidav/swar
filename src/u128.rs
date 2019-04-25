@@ -338,14 +338,19 @@ impl Bits2<u128> {
     /// ```
     #[inline]
     pub fn pack_ones(self) -> Bits4<u128> {
+        // ABCD
         let Self(x) = self;
-        let l = x & LEFT_MASKS[5];
-        let r = x & RIGHT_MASKS[5];
-        let l0 = l;
-        let l1 = l & LEFT_MASKS[6];
-        let l0_l0 = l0 | l0 >> 1;
-        let l1_l1 = l1 | l1 >> 1;
-        Bits4(l1_l1 & r << 2 | l0_l0 & r << 1 | l >> 2 | r)
+        // AB00
+        let l0 = x & LEFT_MASKS[5];
+        // AB11
+        let l1 = x | RIGHT_MASKS[5];
+        // 00CD
+        let r0 = x & RIGHT_MASKS[5];
+        // ABB0 (extra A is fine because it gets & with 0)
+        let b = l0 | l0 >> 1;
+        // AAB0 (extra B is fine because it gets & with 0)
+        let a = l1 & l1 >> 1;
+        Bits4(a & r0 << 2 | b & r0 << 1 | l0 >> 2 | r0)
     }
 
     #[inline]

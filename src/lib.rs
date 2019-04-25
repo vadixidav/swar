@@ -33,6 +33,7 @@
 //! assert_eq!(a.minhwd(b), expected);
 //! ```
 #![no_std]
+#![allow(clippy::many_single_char_names)]
 
 pub mod u128;
 
