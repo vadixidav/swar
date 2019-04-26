@@ -339,19 +339,17 @@ impl Bits2<u128> {
     /// ```
     #[inline]
     pub fn pack_ones(self) -> Bits4<u128> {
-        // ABCD
         let Self(x) = self;
-        // AB00
-        let l0 = x & LEFT_MASKS[5];
-        // AB11
-        let l1 = x | RIGHT_MASKS[5];
-        // 00CD
-        let r0 = x & RIGHT_MASKS[5];
-        // ABB0 (extra A is fine because it gets & with 0)
-        let b = l0 | l0 >> 1;
-        // AAB1 (extra B is fine because it gets & with 0)
-        let a = l1 & l1 >> 1;
-        Bits4(a & r0 << 2 | b & r0 << 1 | l0 >> 2 | r0)
+        let x: u8x16 = unsafe { core::mem::transmute(x) };
+        let left = x & 0xF0;
+        let right = x & 0x0F;
+        let left_count = left.count_ones();
+        let right_count = right.count_ones();
+        let one = u8x16::from([1; 16]);
+        let left_out = (one << left_count) - 1;
+        let right_out = (one << right_count) - 1;
+        let x = left_out << 4 | right_out;
+        Bits4(unsafe { core::mem::transmute(x) })
     }
 
     #[inline]
