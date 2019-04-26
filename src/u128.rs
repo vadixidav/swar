@@ -348,7 +348,7 @@ impl Bits2<u128> {
         let r0 = x & RIGHT_MASKS[5];
         // ABB0 (extra A is fine because it gets & with 0)
         let b = l0 | l0 >> 1;
-        // AAB0 (extra B is fine because it gets & with 0)
+        // AAB1 (extra B is fine because it gets & with 0)
         let a = l1 & l1 >> 1;
         Bits4(a & r0 << 2 | b & r0 << 1 | l0 >> 2 | r0)
     }
@@ -570,6 +570,57 @@ impl Bits4<u128> {
     #[inline]
     pub fn count_ones(self) -> u32 {
         self.0.count_ones()
+    }
+
+    /// Sqishes all the bits to the right in each 2-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits4(0b0111_0001);
+    /// let out = Bits8(0b00001111);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits4(0b1111_0000);
+    /// let out = Bits8(0b0000_1111);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits4(0b0011_0001);
+    /// let out = Bits8(0b0000_0111);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits4(0b0011_0011);
+    /// let out = Bits8(0b00001111);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits4(0b1111_1111);
+    /// let out = Bits8(0b11111111);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    /// ```
+    #[inline]
+    pub fn pack_ones(self) -> Bits8<u128> {
+        // ABCDEFGH
+        let Self(x) = self;
+
+        // EFGH1111
+        let r1 = x << 4 | RIGHT_MASKS[4];
+        let r0 = x & RIGHT_MASKS[4];
+
+        let dup_to_5 = |n| {
+            let n = n | n >> 1;
+            n | n >> 2 | n >> 3
+        };
+
+        // AAAAA000
+        let a = dup_to_5(x & LEFT_MASKS[4] & LEFT_MASKS[5] & LEFT_MASKS[6]);
+        // 0BBBBB00
+        let b = dup_to_5(x & LEFT_MASKS[4] & LEFT_MASKS[5] & RIGHT_MASKS[6]);
+        // 00CCCCC0
+        let c = dup_to_5(x & LEFT_MASKS[4] & RIGHT_MASKS[5] & LEFT_MASKS[6]);
+        // 000DDDDD
+        let d = dup_to_5(x & LEFT_MASKS[4] & RIGHT_MASKS[5] & RIGHT_MASKS[6]);
+
+        Bits8(a & r1 | b & r1 >> 1 | c & r1 >> 2 | d & r1 >> 3 | r0)
     }
 
     #[inline]
