@@ -1,5 +1,6 @@
 use crate::*;
 use core::ops::{Add, BitAnd, Shr};
+use packed_simd::{u16x8, u32x4, u64x2, u8x16};
 
 pub const LEFT_MASKS: [u128; 7] = [
     0xFFFF_FFFF_FFFF_FFFF_0000_0000_0000_0000,
@@ -577,6 +578,10 @@ impl Bits4<u128> {
     /// ```
     /// use swar::*;
     ///
+    /// let input = Bits4(0b1111_1111);
+    /// let out = Bits8(0b11111111);
+    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
+    ///
     /// let input = Bits4(0b0111_0001);
     /// let out = Bits8(0b00001111);
     /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
@@ -592,35 +597,20 @@ impl Bits4<u128> {
     /// let input = Bits4(0b0011_0011);
     /// let out = Bits8(0b00001111);
     /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
-    ///
-    /// let input = Bits4(0b1111_1111);
-    /// let out = Bits8(0b11111111);
-    /// assert_eq!(input.pack_ones(), out, "got {:08b} expected {:08b}", input.pack_ones().0, out.0);
     /// ```
     #[inline]
     pub fn pack_ones(self) -> Bits8<u128> {
-        // ABCDEFGH
         let Self(x) = self;
-
-        // EFGH1111
-        let r1 = x << 4 | RIGHT_MASKS[4];
-        let r0 = x & RIGHT_MASKS[4];
-
-        let dup_to_5 = |n| {
-            let n = n | n >> 1;
-            n | n >> 2 | n >> 3
-        };
-
-        // AAAAA000
-        let a = dup_to_5(x & LEFT_MASKS[4] & LEFT_MASKS[5] & LEFT_MASKS[6]);
-        // 0BBBBB00
-        let b = dup_to_5(x & LEFT_MASKS[4] & LEFT_MASKS[5] & RIGHT_MASKS[6]);
-        // 00CCCCC0
-        let c = dup_to_5(x & LEFT_MASKS[4] & RIGHT_MASKS[5] & LEFT_MASKS[6]);
-        // 000DDDDD
-        let d = dup_to_5(x & LEFT_MASKS[4] & RIGHT_MASKS[5] & RIGHT_MASKS[6]);
-
-        Bits8(a & r1 | b & r1 >> 1 | c & r1 >> 2 | d & r1 >> 3 | r0)
+        let x: u8x16 = unsafe { core::mem::transmute(x) };
+        let counted = x.count_ones();
+        // The XOR must be done because there is an issue where shifting in
+        // SIMD shifts by n % LANE_WIDTH, so when we shift by LANE_WIDTH it
+        // actually shifts by 0, so to counteract that we have to take that
+        // 1 bit that is set when LANE_WIDTH is the count and XOR it with
+        // the 1 that is in the 0th bit index to turn the register to 0
+        // so that when we subtract from it we get all 1s.
+        let x = (u8x16::from([1; 16]) << (counted % 8) ^ counted >> 3) - 1;
+        Bits8(unsafe { core::mem::transmute(x) })
     }
 
     #[inline]
@@ -808,6 +798,34 @@ impl Bits8<u128> {
         self.0.count_ones()
     }
 
+    /// Sqishes all the bits to the right in each 16-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits8(0x0101_FFFF);
+    /// let out = Bits16(0x0003_FFFF);
+    /// assert_eq!(input.pack_ones(), out, "got {:08X} expected {:08X}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits8(0x0000_FFFF_0F0F_00FF);
+    /// let out = Bits16(0x0000_FFFF_00FF_00FF);
+    /// assert_eq!(input.pack_ones(), out, "got {:016X} expected {:016X}", input.pack_ones().0, out.0);
+    /// ```
+    #[inline]
+    pub fn pack_ones(self) -> Bits16<u128> {
+        let Self(x) = self;
+        let x: u16x8 = unsafe { core::mem::transmute(x) };
+        let counted = x.count_ones();
+        // The XOR must be done because there is an issue where shifting in
+        // SIMD shifts by n % LANE_WIDTH, so when we shift by LANE_WIDTH it
+        // actually shifts by 0, so to counteract that we have to take that
+        // 1 bit that is set when LANE_WIDTH is the count and XOR it with
+        // the 1 that is in the 0th bit index to turn the register to 0
+        // so that when we subtract from it we get all 1s.
+        let x = (u16x8::from([1; 8]) << (counted % 16) ^ counted >> 4) - 1;
+        Bits16(unsafe { core::mem::transmute(x) })
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2()
@@ -989,6 +1007,34 @@ impl Bits16<u128> {
         self.0.count_ones()
     }
 
+    /// Sqishes all the bits to the right in each 32-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits16(0xFFFF_0000);
+    /// let out = Bits32(0x0000_FFFF);
+    /// assert_eq!(input.pack_ones(), out, "got {:08X} expected {:08X}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits16(0x00FF_007F);
+    /// let out = Bits32(0x0000_7FFF);
+    /// assert_eq!(input.pack_ones(), out, "got {:08X} expected {:08X}", input.pack_ones().0, out.0);
+    /// ```
+    #[inline]
+    pub fn pack_ones(self) -> Bits32<u128> {
+        let Self(x) = self;
+        let x: u32x4 = unsafe { core::mem::transmute(x) };
+        let counted = x.count_ones();
+        // The XOR must be done because there is an issue where shifting in
+        // SIMD shifts by n % LANE_WIDTH, so when we shift by LANE_WIDTH it
+        // actually shifts by 0, so to counteract that we have to take that
+        // 1 bit that is set when LANE_WIDTH is the count and XOR it with
+        // the 1 that is in the 0th bit index to turn the register to 0
+        // so that when we subtract from it we get all 1s.
+        let x = (u32x4::from([1; 4]) << (counted % 32) ^ counted >> 5) - 1;
+        Bits32(unsafe { core::mem::transmute(x) })
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().sum_weight2().sum_weight2().0
@@ -1164,6 +1210,34 @@ impl Bits32<u128> {
         self.0.count_ones()
     }
 
+    /// Sqishes all the bits to the right in each 64-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits32(0x0000_FFFF);
+    /// let out = Bits64(0x0000_FFFF);
+    /// assert_eq!(input.pack_ones(), out, "got {:08X} expected {:08X}", input.pack_ones().0, out.0);
+    ///
+    /// let input = Bits32(0x00FF_007F);
+    /// let out = Bits64(0x0000_7FFF);
+    /// assert_eq!(input.pack_ones(), out, "got {:08X} expected {:08X}", input.pack_ones().0, out.0);
+    /// ```
+    #[inline]
+    pub fn pack_ones(self) -> Bits64<u128> {
+        let Self(x) = self;
+        let x: u64x2 = unsafe { core::mem::transmute(x) };
+        let counted = x.count_ones();
+        // The XOR must be done because there is an issue where shifting in
+        // SIMD shifts by n % LANE_WIDTH, so when we shift by LANE_WIDTH it
+        // actually shifts by 0, so to counteract that we have to take that
+        // 1 bit that is set when LANE_WIDTH is the count and XOR it with
+        // the 1 that is in the 0th bit index to turn the register to 0
+        // so that when we subtract from it we get all 1s.
+        let x = (u64x2::from([1; 2]) << (counted % 64) ^ counted >> 6) - 1;
+        Bits64(unsafe { core::mem::transmute(x) })
+    }
+
     #[inline]
     pub fn sum_weight(self) -> u128 {
         self.sum_weight2().sum_weight2().0
@@ -1333,6 +1407,21 @@ impl Bits64<u128> {
     #[inline]
     pub fn count_ones(self) -> u32 {
         self.0.count_ones()
+    }
+
+    /// Sqishes all the bits to the right in each 64-bit segment.
+    ///
+    /// ```
+    /// use swar::*;
+    ///
+    /// let input = Bits64(0x00FF_00FF);
+    /// let out = Bits128(0x0000_FFFF);
+    /// assert_eq!(input.pack_ones(), out, "got {:08X} expected {:08X}", input.pack_ones().0, out.0);
+    /// ```
+    #[inline]
+    pub fn pack_ones(self) -> Bits128<u128> {
+        let Self(x) = self;
+        Bits128((1 << x.count_ones()) - 1)
     }
 
     #[inline]
