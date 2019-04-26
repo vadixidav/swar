@@ -315,7 +315,7 @@ impl Bits2<u128> {
         self.0.count_ones()
     }
 
-    /// Sqishes all the bits to the right in each 2-bit segment.
+    /// Sqishes all the bits to the right in each 4-bit segment.
     ///
     /// ```
     /// use swar::*;
@@ -572,7 +572,7 @@ impl Bits4<u128> {
         self.0.count_ones()
     }
 
-    /// Sqishes all the bits to the right in each 2-bit segment.
+    /// Sqishes all the bits to the right in each 8-bit segment.
     ///
     /// ```
     /// use swar::*;
